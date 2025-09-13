@@ -1,0 +1,106 @@
+server:
+  mode: dev         # 应用程序运行模式（dev开发环境、test测试环境、prod线上环境）
+  host: 0.0.0.0     # 服务器IP地址，默认使用0.0.0.0
+  name: dilu-app    # 服务名称
+  Node: 1           #节点编号
+  port: 7888        # 服务端口号
+  #read-timeout     #读超时 单位秒 默认20
+  #write-timeout    #写超时 单位秒 默认20
+  fs-type: local    #文件服务
+grpc-server:
+  enable: false
+  host: 0.0.0.0
+  port: 7889
+logger:             # 日志配置
+  level: debug # 级别
+  prefix:    # 日志前缀
+  format:  # 输出格式 json
+  director: temp      # 日志文件夹
+  encode-level: LowercaseColorLevelEncoder # 编码级
+  stacktrace-key: # 栈名
+  #max-age: 7                         # 日志留存时间 默认7天
+  show-line: true # 显示行
+  log-in-console: true # 输出控制台
+access-limit: #访问频率限制
+  enable: true #是否访问限制
+  duration: 5s #时长
+  total: 300 #300次
+jwt:                # JWT配置
+  sign-key: 56n1KywHIPEkWWIxffGpp8Dfl3z5SjE5WBeDStc1T64klnpoAqHrHN01vnete123   # Token密钥
+  expires: 10080    # Token过期时长（单位：分钟）
+  refresh: 14400    # Token 刷新时长（单位：分钟）
+cache:              # 缓存配置
+  type: redis #redis/memory
+  addr: 192.168.0.78:6379    # Redis cluster模式以;隔开（redis本身必须是cluster模式），eg：localhost:6379;localhost:6380
+  password: 123456             # Redis密码
+  db: 1                       # 设置 DB, 只针对 `Redis Client` 和 `Failover Client`
+  master-name:  #不为空 Failover模式
+dbcfg: # 数据库配置
+  #driver: mysql  
+  #dns: root:123456@tcp(127.0.0.1:3306)/xxx-db?charset=utf8mb4&parseTime=True&loc=Local&timeout=1000ms  # 数据库连接字符串
+  #log-mode: info #日志类型 GORM 定义了这些日志级别：silent、error、warn、info
+  #slow-threshold: 200 #慢日志
+  #max-idle-conns: 20 #最大空闲连接数 默认10
+  #max-open-conns: 60 #最大打开数
+  #prefix: 日志前缀
+cors:
+  enable: true
+  mode: allow-all
+  #whitelist:
+  #- allow-origin: example1.com
+  #  allow-methods: POST, GET
+  #  allow-headers: Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id
+  #  expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers,
+  #    Content-Type
+  #  allow-credentials: true
+gen: 
+  enable: true #开启生成
+  front-path: ../dilu-admin/src #前端生成路径 默认：../dilu-admin/src
+extend:             # 扩展项（此处没有提供具体说明）
+  rd-config:
+    enable: false
+    driver: consul
+    endpoints:
+      - 172.19.167.104:8500
+    scheme: http
+    timeout: 5s
+    registers:
+      - id:  #172.19.167.104:7888
+        protocol: http
+        #name: dilu-app
+        #addr: 172.19.167.104
+        #port: 7888
+        #health-check: http://172.19.167.104:7888/api/health
+        #tags:
+        #  - "dev"
+        #interval: 5s
+        #timeout: 10s
+      - id:  #172.19.167.104:7889
+        protocol: grpc
+        #name: dilu-app-grpc
+        #addr: 172.19.167.104
+        #port: 7889
+        #health-check: 172.19.167.104:7889/Health
+        #tags:
+        #  - "dev"
+        #interval: 5s
+        #timeout: 10s
+    discoveries:
+      - name: name
+        enable: false
+        fail-limit: 3
+  ding: 
+    agent-id:
+    app-key:
+    app-secret:
+    crop-id:
+  wechat-mp:
+    app-id: 
+    app-secret: 
+    wx-token: 
+    encoding-aes-key: 
+  ai:
+    ali:
+      sk: 
+
+    

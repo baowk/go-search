@@ -1,0 +1,885 @@
+definitions:
+  base.PageResp:
+    properties:
+      currentPage:
+        description: 当前第几页
+        type: integer
+      list:
+        description: 数据列表
+      pageSize:
+        description: 分页大小
+        type: integer
+      total:
+        description: 总条数
+        type: integer
+    type: object
+  base.ReqIds:
+    properties:
+      ids:
+        description: 多id
+        items:
+          type: integer
+        type: array
+    type: object
+  base.Resp:
+    properties:
+      code:
+        description: 返回码
+        type: integer
+      data:
+        description: 数据
+      msg:
+        description: 消息
+        type: string
+      reqId:
+        description: '`json:"请求id"`'
+        type: string
+    type: object
+  dto.AlsoAskItem:
+    properties:
+      question:
+        type: string
+    type: object
+  dto.DBReq:
+    properties:
+      dbName:
+        type: string
+      page:
+        description: 页码
+        type: integer
+      pageSize:
+        description: 每页大小
+        type: integer
+      tableName:
+        type: string
+    type: object
+  dto.DbOption:
+    properties:
+      label:
+        type: string
+      value:
+        type: string
+    type: object
+  dto.GenCodeReq:
+    properties:
+      force:
+        type: boolean
+      tableId:
+        type: integer
+    type: object
+  dto.GenTablesGetPageReq:
+    properties:
+      dbName:
+        type: string
+      page:
+        description: 页码
+        type: integer
+      pageSize:
+        description: 每页大小
+        type: integer
+      tableName:
+        type: string
+    type: object
+  dto.GetSearchInformationItem:
+    properties:
+      query_displayed:
+        type: string
+    type: object
+  dto.GetSearchPagination:
+    properties:
+      current:
+        type: integer
+      next:
+        type: string
+      other_pages:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+  dto.ImpTablesReq:
+    properties:
+      dbName:
+        type: string
+      tables:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.OrganicResultsItem:
+    properties:
+      date:
+        type: string
+      description:
+        type: string
+      detailed:
+        type: string
+      img:
+        additionalProperties:
+          type: string
+        type: object
+      origin_navigation:
+        type: string
+      origin_site:
+        type: string
+      position:
+        type: integer
+      source_logo:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  dto.RelatedSearchesData:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.RelatedSearchesDataItem'
+        type: array
+    type: object
+  dto.RelatedSearchesDataItem:
+    properties:
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  dto.SearchMetadata:
+    properties:
+      created_at:
+        type: string
+      google_url:
+        type: string
+      id:
+        type: string
+      json_endpoint:
+        type: string
+      processed_at:
+        type: string
+      raw_html_file:
+        type: string
+      total_time_taken:
+        type: number
+      xray_html_file:
+        type: string
+    type: object
+  dto.SearchReq:
+    properties:
+      api_key:
+        description: Parameter api_key open search required
+        type: string
+      cr:
+        description: Parameter defines one or multiple countries to limit the search
+          to. It uses country{two-letter upper-case country code} to specify countries
+          and cr="countryCN|countryJP"
+        type: string
+      device:
+        description: Parameter defines the device to use to get the results. Currently
+          only supports desktop version.
+        type: string
+      engine:
+        description: Parameter engine Currently only supports google
+        type: string
+      fetch_mode:
+        description: Parameter fetch_mode Currently only supports static
+        type: string
+      filter:
+        description: Parameter defines the exclusion of results from an auto-corrected
+          query when the original query is spelled wrong. It can be set to 1 to exclude
+          these results, or 0 to include them (default). Note that this parameter
+          may not prevent Google from returning results for an auto-corrected query
+          if no other results are available. 1 or 0
+        type: string
+      gl:
+        description: Parameter defines the country to use for the Google search. It's
+          a two-letter country code. (e.g., us for the United States, uk for United
+          Kingdom, or fr for France). Head to the Google countries page for a full
+          list of supported Google countries.
+        type: string
+      google_domain:
+        description: Parameter defines the Google domain to use. It defaults to google.com.
+          Head to the Google domains page for a full list of supported Google domains.
+        type: string
+      hl:
+        description: Parameter defines the language to use for the Google search.
+          It's a two-letter language code. (e.g., en for English, es for Spanish,
+          or fr for French). Head to the Google languages page for a full list of
+          supported Google languages.
+        type: string
+      html:
+        description: Parameter html 1 or 0
+        type: string
+      ibp:
+        description: Parameter is responsible for rendering layouts and expansions
+          for some elements (e.g., gwp;0,7 to expand searches with ludocid for expanded
+          knowledge graph).
+        type: string
+      kgmid:
+        description: Parameter defines the id (KGMID) of the Google Knowledge Graph
+          listing you want to scrape. Also known as Google Knowledge Graph ID. Searches
+          with kgmid parameter will return results for the originally encrypted search
+          parameters. For some searches, kgmid may override all other parameters except
+          start, and num parameters.
+        type: string
+      location:
+        description: Parameter defines from where you want the search to originate.
+          If several locations match the location requested, we'll pick the most popular
+          one. Head to the /locations.json API if you need more precise control. The
+          location and uule parameters can't be used together. It is recommended to
+          specify location at the city level in order to simulate a real user’s search.
+          If location is omitted, the search may take on the location of the proxy.
+        type: string
+      lr:
+        description: Parameter defines one or multiple languages to limit the search
+          to. It uses lang_{two-letter language code} to specify languages and lr
+          = "lang_de|lang_ja"
+        type: string
+      lsig:
+        description: Parameter that you might have to use to force the knowledge graph
+          map view to show up. You can find the lsig ID by using our Local Pack API
+          or Google Local API.lsig ID is also available via a redirect Google uses
+          within Google My Business.
+        type: string
+      ludocid:
+        description: Parameter defines the id (CID) of the Google My Business listing
+          you want to scrape. Also known as Google Place ID.
+        type: string
+      nfpr:
+        description: Parameter defines if the filters for 'Similar Results' and 'Omitted
+          Results' are on or off. It can be set to 1 (default) to enable these filters,
+          or 0 to disable these filters. 1 or 0
+        type: string
+      no_cache:
+        description: Parameter will force SerpApi to fetch the Google results even
+          if a cached version is already present. A cache is served only if the query
+          and all parameters are exactly the same. Cache expires after 1h. Cached
+          searches are free, and are not counted towards your searches per month.
+          It can be set to false (default) to allow results from the cache, or true
+          to disallow results from the cache. no_cache and async parameters should
+          not be used together. true or false
+        type: boolean
+      num:
+        description: Parameter defines the maximum number of results to return. (e.g.,
+          10 (default) returns 10 results, 40 returns 40 results, and 100 returns
+          100 results).The use of num may introduce latency, and/or prevent the inclusion
+          of specialized result types. It is better to omit this parameter unless
+          it is strictly necessary to increase the number of results per page.
+        type: integer
+      q:
+        description: Parameter defines the query you want to search. You can use anything
+          that you would use in a regular Google search. e.g. inurl:, site:, intitle:.
+          We also support advanced search query parameters such as as_dt and as_eq.
+          See the full list of supported advanced search query parameters.
+        type: string
+      safe:
+        description: Parameter defines the level of filtering for adult content. It
+          can be set to active or off, by default Google will blur explicit content.
+          off or active
+        type: string
+      sk_type:
+        type: string
+      start:
+        description: Parameter defines the result offset. It skips the given number
+          of results. It's used for pagination. (e.g., 0 (default) is the first page
+          of results, 10 is the 2nd page of results, 20 is the 3rd page of results,
+          etc.).Google Local Results only accepts multiples of 20(e.g. 20 for the
+          second page results, 40 for the third page results, etc.) as the start value.
+        type: integer
+      tbm:
+        description: 'Parameter defines the type of search you want to do. It can
+          be set to: lcl:Google Local API'
+        type: string
+      tbs:
+        description: Parameter defines advanced search parameters that aren't possible
+          in the regular query field. (e.g., advanced search for patents, dates, news,
+          videos, images, apps, or text contents). (to be searched)
+        type: string
+      time:
+        description: Parameter time last hour=h last day=d last week=w last month=m
+          last year=y
+        type: string
+      udm:
+        type: integer
+      uds:
+        description: 'Parameter enables to filter search. It''s a string provided
+          by Google as a filter. uds values are provided under the section: filters
+          with uds, q and serpapi_link values provided for each filter.'
+        type: string
+    required:
+    - q
+    type: object
+  dto.SearchResp:
+    properties:
+      also_ask:
+        items:
+          $ref: '#/definitions/dto.AlsoAskItem'
+        type: array
+      organic_results:
+        description: |-
+          LocalResults      []LocalResultsItem         `json:"local_results"`      //
+          LocalMap          []LocalMapItem             `json:"local_map"`          //
+        items:
+          $ref: '#/definitions/dto.OrganicResultsItem'
+        type: array
+      pagination:
+        $ref: '#/definitions/dto.GetSearchPagination'
+      raw_html:
+        description: 原始html
+        type: string
+      related_searches:
+        allOf:
+        - $ref: '#/definitions/dto.RelatedSearchesData'
+        description: KnowledgeGraph  []KnowledgeGraphItem `json:"knowledge_graph"`  //
+      search_information:
+        items:
+          $ref: '#/definitions/dto.GetSearchInformationItem'
+        type: array
+      search_metadata:
+        allOf:
+        - $ref: '#/definitions/dto.SearchMetadata'
+        description: CostTime          float64                    `json:"cost_time"`          //
+      search_parameters:
+        $ref: '#/definitions/dto.SearchReq'
+      url:
+        type: string
+    type: object
+  models.GenColumns:
+    properties:
+      columnComment:
+        type: string
+      columnId:
+        description: 主键
+        type: integer
+      columnName:
+        type: string
+      columnType:
+        type: string
+      createBy:
+        type: integer
+      createdAt:
+        description: 创建时间
+        type: string
+      dictType:
+        type: string
+      edit:
+        type: integer
+      fkLabelId:
+        type: string
+      fkLabelName:
+        type: string
+      fkTableName:
+        type: string
+      fkTableNameClass:
+        type: string
+      fkTableNamePackage:
+        type: string
+      goField:
+        type: string
+      goType:
+        type: string
+      htmlType:
+        type: string
+      increment:
+        type: integer
+      insert:
+        type: boolean
+      isEdit:
+        type: string
+      isIncrement:
+        type: string
+      isInsert:
+        type: string
+      isList:
+        type: string
+      isPk:
+        type: string
+      isQuery:
+        type: string
+      isRequired:
+        type: string
+      jsonField:
+        type: string
+      list:
+        type: string
+      pk:
+        type: boolean
+      query:
+        type: integer
+      queryType:
+        type: string
+      remark:
+        type: string
+      required:
+        type: boolean
+      sort:
+        type: integer
+      superColumn:
+        type: integer
+      tableId:
+        type: integer
+      tsType:
+        type: string
+      updateBy:
+        type: integer
+      updatedAt:
+        description: 最后更新时间
+        type: string
+      usableColumn:
+        type: integer
+    type: object
+  models.GenTables:
+    properties:
+      apiRoot:
+        type: string
+      businessName:
+        type: string
+      className:
+        type: string
+      columns:
+        items:
+          $ref: '#/definitions/models.GenColumns'
+        type: array
+      createBy:
+        description: 创建者
+        type: integer
+      createdAt:
+        description: 创建时间
+        type: string
+      crud:
+        type: boolean
+      dbName:
+        type: string
+      functionAuthor:
+        type: string
+      functionName:
+        type: string
+      isActions:
+        type: integer
+      isAuth:
+        type: integer
+      isDataScope:
+        type: integer
+      isLogicalDelete:
+        type: string
+      logicalDelete:
+        type: boolean
+      logicalDeleteColumn:
+        type: string
+      moduleFrontName:
+        description: 前端文件名
+        type: string
+      moduleName:
+        type: string
+      options:
+        type: string
+      packageName:
+        type: string
+      pkColumn:
+        type: string
+      pkGoField:
+        type: string
+      pkJsonField:
+        type: string
+      remark:
+        type: string
+      tableComment:
+        type: string
+      tableId:
+        description: 主键
+        type: integer
+      tableName:
+        type: string
+      tplCategory:
+        type: string
+      tree:
+        type: integer
+      treeCode:
+        type: string
+      treeName:
+        type: string
+      treeParentCode:
+        type: string
+      updateBy:
+        description: 更新者
+        type: integer
+      updatedAt:
+        description: 最后更新时间
+        type: string
+    type: object
+  utils.Cpu:
+    properties:
+      cores:
+        type: integer
+      cpus:
+        items:
+          type: number
+        type: array
+      usedPercent:
+        type: number
+    type: object
+  utils.Disk:
+    properties:
+      totalGb:
+        type: integer
+      totalMb:
+        type: integer
+      usedGb:
+        type: integer
+      usedMb:
+        type: integer
+      usedPercent:
+        type: integer
+    type: object
+  utils.Os:
+    properties:
+      compiler:
+        type: string
+      goVersion:
+        type: string
+      goos:
+        type: string
+      numCpu:
+        type: integer
+      numGoroutine:
+        type: integer
+    type: object
+  utils.Ram:
+    properties:
+      totalMb:
+        type: integer
+      usedMb:
+        type: integer
+      usedPercent:
+        type: integer
+    type: object
+  utils.Server:
+    properties:
+      cpu:
+        $ref: '#/definitions/utils.Cpu'
+      disk:
+        $ref: '#/definitions/utils.Disk'
+      os:
+        $ref: '#/definitions/utils.Os'
+      ram:
+        $ref: '#/definitions/utils.Ram'
+    type: object
+info:
+  contact:
+    email: baowk1024@gmail.com
+    name: baowk
+    url: https://github.com/baowk/dilu
+  description: 致力于做一个开发快速，运行稳定的框架
+  title: Dilu API
+  version: V0.0.1
+paths:
+  /api/search:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      parameters:
+      - description: Parameter api_key open search required
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: Parameter engine Currently only supports google
+        in: query
+        name: engine
+        type: string
+      - description: Parameter defines the query you want to search. You can use anything
+          that you would use in a regular Google search. e.g. inurl:, site:, intitle:.
+          We also support advanced search query parameters such as as_dt and as_eq.
+          See the full list of supported advanced search query parameters.
+        in: query
+        name: q
+        required: true
+        type: string
+      - description: Parameter defines the language to use for the Google search.
+          It's a two-letter language code. (e.g., en for English, es for Spanish,
+          or fr for French). Head to the Google languages page for a full list of
+          supported Google languages.
+        in: query
+        name: hl
+        type: string
+      - description: Parameter defines the country to use for the Google search. It's
+          a two-letter country code. (e.g., us for the United States, uk for United
+          Kingdom, or fr for France). Head to the Google countries page for a full
+          list of supported Google countries.
+        in: query
+        name: gl
+        type: string
+      - description: Parameter date. last hour=h last day=d last week=w last month=m
+          last year=y
+        in: query
+        name: date
+        type: string
+      - description: Parameter defines the result offset. It skips the given number
+          of results. It's used for pagination. (e.g., 0 (default) is the first page
+          of results, 10 is the 2nd page of results, 20 is the 3rd page of results,
+          etc.).Google Local Results only accepts multiples of 20(e.g. 20 for the
+          second page results, 40 for the third page results, etc.) as the start value.
+        in: query
+        name: start
+        type: integer
+      - description: Parameter defines the maximum number of results to return. (e.g.,
+          10 (default) returns 10 results, 40 returns 40 results, and 100 returns
+          100 results).The use of num may introduce latency, and/or prevent the inclusion
+          of specialized result types. It is better to omit this parameter unless
+          it is strictly necessary to increase the number of results per page.
+        in: query
+        name: num
+        type: integer
+      - description: Parameter defines the device to use to get the results. Currently
+          only supports desktop version.
+        in: query
+        name: device
+        type: string
+      - description: Parameter defines the Google domain to use. It defaults to google.com.
+          Head to the Google domains page for a full list of supported Google domains.
+        in: query
+        name: google_domain
+        type: string
+      - description: Parameter html 1 or 0
+        in: query
+        name: html
+        type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/base.Resp'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SearchResp'
+              type: object
+      summary: google search
+      tags:
+      - open
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SearchReq'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/base.Resp'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SearchResp'
+              type: object
+      summary: google search
+      tags:
+      - open
+  /api/test:
+    get:
+      parameters:
+      - description: 并发.
+        in: query
+        name: qps
+        type: integer
+      - description: 循环次数 1 or 0
+        in: query
+        name: loops
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/base.Resp'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: integer
+                  type: object
+              type: object
+      summary: Test
+      tags:
+      - open
+  /api/v1/tools/gen/add:
+    post:
+      consumes:
+      - application/json
+      description: 添加表结构
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ImpTablesReq'
+      responses:
+        "200":
+          description: '{"code": -1, "message": "添加失败"}'
+          schema:
+            type: string
+      summary: 添加表结构
+      tags:
+      - 工具 / 生成工具
+  /api/v1/tools/gen/code:
+    post:
+      consumes:
+      - application/json
+      description: 生成代码
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GenCodeReq'
+      responses:
+        "200":
+          description: '{"code": 200, "message": "添加成功"}'
+          schema:
+            type: string
+      summary: 生成代码
+      tags:
+      - 工具 / 生成工具
+  /api/v1/tools/gen/db/tables:
+    post:
+      description: 数据库表分页列表 / database table page list
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DBReq'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            $ref: '#/definitions/base.Resp'
+      summary: 分页列表数据 / page list data
+      tags:
+      - 工具 / 生成工具
+  /api/v1/tools/gen/dbs:
+    post:
+      consumes:
+      - application/json
+      description: 获取配置的数据库
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/base.Resp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.DbOption'
+                  type: array
+              type: object
+      summary: 获取配置的数据库
+      tags:
+      - 工具 / 生成工具
+  /api/v1/tools/gen/del:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/base.ReqIds'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/base.Resp'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GenTables'
+              type: object
+      summary: 删除GenTables
+      tags:
+      - 工具 / 生成工具
+  /api/v1/tools/gen/page:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GenTablesGetPageReq'
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/base.Resp'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/base.PageResp'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/models.GenTables'
+                        type: array
+                    type: object
+              type: object
+      summary: 获取GenTables列表
+      tags:
+      - 工具 / 生成工具
+  /api/v1/tools/gen/update:
+    post:
+      consumes:
+      - application/json
+      description: 修改表结构
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.GenTables'
+      responses:
+        "200":
+          description: '{"code": -1, "message": "添加失败"}'
+          schema:
+            type: string
+      summary: 修改表结构
+      tags:
+      - 工具 / 生成工具
+  /api/v1/tools/monitor:
+    post:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 200, "data": [...]}'
+          schema:
+            allOf:
+            - $ref: '#/definitions/base.Resp'
+            - properties:
+                data:
+                  $ref: '#/definitions/utils.Server'
+              type: object
+      security:
+      - Bearer: []
+      summary: 监控
+      tags:
+      - 工具 / 监控
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
