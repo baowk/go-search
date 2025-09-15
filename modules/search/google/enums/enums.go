@@ -9,9 +9,8 @@ const (
 	ErrRiskControl               = 40001 //风控错误
 	ErrRiskControlClickCode      = 40002 //点击验证风控
 	ErrRiskControlJavaScriptCode = 40003 //JavaScript风控
-
-	ErrParseHtml = 50001 //解析错误
-	Err429       = 429   //请求过于频繁
+	ErrParseHtml                 = 50001 //解析错误
+	Err429                       = 429   //请求过于频繁
 
 	EngineGoogle = "google"
 

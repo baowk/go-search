@@ -2,7 +2,6 @@ package apis
 
 import (
 	"bufio"
-	"dilu/modules/search/google/handler"
 	"dilu/modules/search/service"
 	"dilu/modules/search/service/dto"
 	"fmt"
@@ -131,6 +130,9 @@ func (e *SearchApi) Test(c *gin.Context) {
 	loops, _ := strconv.Atoi(strLoops)
 	errm := make(map[int]int, 0)
 	lock := sync.Mutex{}
+	total := qps * loops
+	wg := &sync.WaitGroup{}
+	wg.Add(total)
 
 	for i := 0; i < loops; i++ {
 		for j := 0; j < qps; j++ {
@@ -138,10 +140,10 @@ func (e *SearchApi) Test(c *gin.Context) {
 				Q: keywords[rand.IntN(len(keywords))],
 			}
 			go func() {
+				defer wg.Done()
 				var res dto.SearchResp
-				code, _ := handler.ToSearch(params, &res)
+				code := service.SerSearchService.SearchHandler(params, &res)
 				lock.Lock()
-				//fmt.Println(err)
 				if cnt, ok := errm[code]; ok {
 					errm[code] = cnt + 1
 				} else {
@@ -153,7 +155,7 @@ func (e *SearchApi) Test(c *gin.Context) {
 		}
 		time.Sleep(1 * time.Second)
 	}
-	time.Sleep(10 * time.Second)
+	wg.Wait()
 	fmt.Printf("err map: %+v\n", errm)
 	e.Ok(c, errm)
 }

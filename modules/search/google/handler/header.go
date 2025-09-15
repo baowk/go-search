@@ -9,6 +9,8 @@ import (
 
 const (
 	cookies_key = "serp:google:cookies"
+
+	cookies_fail_key = "serp:google:cookies:fail"
 )
 
 func GetReqHeader() (*SimpleCookie, error) {
@@ -43,6 +45,23 @@ func BackReqHeader(header *SimpleCookie) error {
 	header.N = header.N + 1
 	data, _ := json.Marshal(header)
 	return rCli.RPush(context.Background(), cookies_key, string(data)).Err()
+}
+
+func SetFailReqHeader(header *SimpleCookie) error {
+	if header == nil {
+		return nil
+	}
+	// if header.N > 39 {
+	// 	return nil
+	// }
+	rCli, err := core.CacheRedis()
+	if err != nil {
+		return err
+	}
+
+	header.N = header.N + 1
+	data, _ := json.Marshal(header)
+	return rCli.RPush(context.Background(), cookies_fail_key, string(data)).Err()
 }
 
 type SimpleCookie struct {

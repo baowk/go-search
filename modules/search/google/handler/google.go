@@ -44,14 +44,30 @@ func ToSearch(params *dto.SearchReq, res *dto.SearchResp) (int, error) {
 	}
 	header, err := GetReqHeader()
 	if err != nil {
+		BackProxy(proxyUrl)
 		return 1000, err
 	}
 
 	data, sCode, err := SearchV2(params, proxyUrl, header)
-	//slog.Error("Search", "sCode", sCode, "proxyUrl", proxyUrl)
+
 	if sCode != enums.Success {
-		SetFailProxy(proxyUrl)
-		return sCode, err
+		slog.Error("Search", "sCode", sCode, "proxyUrl", proxyUrl, "err", err)
+		switch sCode {
+		case enums.ErrParams, enums.ErrDecode, enums.ErrParseHtml:
+			BackProxy(proxyUrl)
+			BackReqHeader(header)
+		case enums.ErrProxy, enums.ErrConn:
+			SetFailProxy(proxyUrl)
+			BackReqHeader(header)
+		case enums.Err429:
+			SetFailProxy(proxyUrl)
+			BackReqHeader(header)
+		case enums.ErrRiskControl, enums.ErrRiskControlClickCode, enums.ErrRiskControlJavaScriptCode:
+			SetFailProxy(proxyUrl)
+		default:
+			SetFailProxy(proxyUrl)
+			SetFailReqHeader(header)
+		}
 	} else {
 		BackProxy(proxyUrl)
 		BackReqHeader(header)
@@ -70,7 +86,7 @@ func ToSearch(params *dto.SearchReq, res *dto.SearchResp) (int, error) {
 	res.SearchMetadata.TotalTimeTaken = diff.Seconds()
 	res.SearchMetadata.ProcessedAt = end.Format("2006-01-02 15:04:05")
 	res.SearchParameters = *params
-	return 0, nil
+	return 200, nil
 }
 
 func SearchV2(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]byte, int, error) {
