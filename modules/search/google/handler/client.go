@@ -15,7 +15,7 @@ import (
 func Get(reqUrl, proxyUrl string, sc *SimpleCookie) ([]byte, int, error) {
 
 	var cookies []*fhttp.Cookie
-	if sc.C != "" {
+	if sc != nil && sc.C != "" {
 		cookies = tls.ToCookies(sc.C)
 	}
 

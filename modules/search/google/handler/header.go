@@ -51,9 +51,9 @@ func SetFailReqHeader(header *SimpleCookie) error {
 	if header == nil {
 		return nil
 	}
-	// if header.N > 39 {
-	// 	return nil
-	// }
+	if header.N > 39 {
+		return nil
+	}
 	rCli, err := core.CacheRedis()
 	if err != nil {
 		return err

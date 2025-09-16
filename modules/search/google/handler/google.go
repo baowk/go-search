@@ -2,19 +2,25 @@ package handler
 
 import (
 	"bytes"
+	"compress/gzip"
 	"dilu/common/utils"
+	"dilu/modules/browser"
 	"dilu/modules/search/google/enums"
 	"dilu/modules/search/service/dto"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"math"
+	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/andybalholm/brotli"
 )
 
 func ToSearch(params *dto.SearchReq, res *dto.SearchResp) (int, error) {
@@ -71,22 +77,22 @@ func ToSearch(params *dto.SearchReq, res *dto.SearchResp) (int, error) {
 	} else {
 		BackProxy(proxyUrl)
 		BackReqHeader(header)
-	}
-
-	if params.Html == "1" {
-		res.RawHtml = string(data)
-	} else {
-		pCode, err := ParseHtmlAll(data, params, res)
-		if pCode != enums.Success {
-			return pCode, err
+		if params.Html == "1" {
+			res.RawHtml = string(data)
+		} else {
+			pCode, err := ParseHtmlAll(data, params, res)
+			if pCode != enums.Success {
+				return pCode, err
+			}
 		}
 	}
+
 	end := time.Now()
 	diff := end.Sub(begin)
 	res.SearchMetadata.TotalTimeTaken = diff.Seconds()
 	res.SearchMetadata.ProcessedAt = end.Format("2006-01-02 15:04:05")
 	res.SearchParameters = *params
-	return 200, nil
+	return sCode, nil
 }
 
 func SearchV2(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]byte, int, error) {
@@ -106,80 +112,96 @@ func SearchV2(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]b
 	return data, code, err
 }
 
-// func Search(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]byte, int, error) {
+func Search(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]byte, int, error) {
+	pUrl, err := url.Parse(proxyUrl)
+	if err != nil {
+		return nil, enums.ErrProxy, err
+	}
 
-// 	pUrl, err := url.Parse(proxyUrl)
-// 	if err != nil {
-// 		return nil, enums.ErrProxy, err
-// 	}
+	req, err := http.NewRequest(http.MethodGet, params.GetGoogleUrl(), nil)
+	if err != nil {
+		return nil, enums.ErrConn, err
+	}
 
-// 	req, err := http.NewRequest(http.MethodGet, params.GetGoogleUrl(), nil)
-// 	if err != nil {
-// 		return nil, enums.ErrConn, err
-// 	}
+	SetRequest(req, header)
+	req.Header.Set("User-Agent", browser.GetUa("chrome", ""))
 
-// 	//parseAndSetCookies(req, cookieHeader)
-// 	header.SetRequest(req)
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(pUrl),
+		},
+	}
 
-// 	client := &http.Client{
-// 		Transport: &http.Transport{
-// 			Proxy: http.ProxyURL(pUrl),
-// 		},
-// 	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, enums.ErrConn, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		slog.Error("Search", "StatusCode", resp.StatusCode, "proxyUrl", proxyUrl)
+		return nil, resp.StatusCode, errors.New("429")
+	}
+	//t2 := time.Now()
 
-// 	resp, err := client.Do(req)
-// 	if err != nil {
-// 		return nil, enums.ErrConn, err
-// 	}
-// 	defer resp.Body.Close()
-// 	if resp.StatusCode != http.StatusOK {
-// 		slog.Error("Search", "StatusCode", resp.StatusCode, "proxyUrl", proxyUrl)
-// 		return nil, resp.StatusCode, errors.New("429")
-// 	}
-// 	//t2 := time.Now()
+	// Handle different compression formats
+	var bodyReader io.Reader
+	contentEncoding := resp.Header.Get("Content-Encoding")
 
-// 	// Handle different compression formats
-// 	var bodyReader io.Reader
-// 	contentEncoding := resp.Header.Get("Content-Encoding")
+	switch {
+	case strings.Contains(contentEncoding, "br"):
+		// Handle Brotli compression
+		bodyReader = brotli.NewReader(resp.Body)
+	case strings.Contains(contentEncoding, "gzip"):
+		// Handle Gzip compression
+		gzipReader, err := gzip.NewReader(resp.Body)
+		if err != nil {
+			fmt.Printf("Failed to create gzip reader, using raw response: %v\n", err)
+			bodyReader = resp.Body
+		} else {
+			defer gzipReader.Close()
+			bodyReader = gzipReader
+		}
+	default:
+		// No compression or unsupported compression
+		bodyReader = resp.Body
+	}
 
-// 	switch {
-// 	case strings.Contains(contentEncoding, "br"):
-// 		// Handle Brotli compression
-// 		bodyReader = brotli.NewReader(resp.Body)
-// 	case strings.Contains(contentEncoding, "gzip"):
-// 		// Handle Gzip compression
-// 		gzipReader, err := gzip.NewReader(resp.Body)
-// 		if err != nil {
-// 			fmt.Printf("Failed to create gzip reader, using raw response: %v\n", err)
-// 			bodyReader = resp.Body
-// 		} else {
-// 			defer gzipReader.Close()
-// 			bodyReader = gzipReader
-// 		}
-// 	default:
-// 		// No compression or unsupported compression
-// 		bodyReader = resp.Body
-// 	}
+	data, err := io.ReadAll(bodyReader)
+	if err != nil {
+		return nil, enums.ErrDecode, err
+	}
 
-// 	data, err := io.ReadAll(bodyReader)
-// 	if err != nil {
-// 		return nil, enums.ErrDecode, err
-// 	}
+	if len(data) < 100_000 {
+		if bytes.Contains(data, []byte(enums.ErrRiskControlClick)) {
+			//saveToFileWithDir(data, "errhtml", fmt.Sprintf("ge_click_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
+			return nil, enums.ErrRiskControlClickCode, fmt.Errorf("click risk control")
+		}
 
-// 	if len(data) < 200000 {
-// 		if bytes.Contains(data, []byte(enums.ErrRiskControlClick)) {
-// 			//saveToFileWithDir(data, "errhtml", fmt.Sprintf("ge_click_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
-// 			return nil, enums.ErrRiskControlClickCode, fmt.Errorf("click risk control")
-// 		}
+		saveToFileWithDir(data, "errhtml", fmt.Sprintf("ge_click_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
+		return data, enums.ErrRiskControl, fmt.Errorf("keyword not found in response: %s", params.Q)
+	} else {
+		//saveToFileWithDir(data, "errhtml", fmt.Sprintf("ok_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
+	}
 
-// 		saveToFileWithDir(data, "errhtml", fmt.Sprintf("ge_click_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
-// 		return data, enums.ErrRiskControl, fmt.Errorf("keyword not found in response: %s", params.Q)
-// 	} else {
-// 		//saveToFileWithDir(data, "errhtml", fmt.Sprintf("ok_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
-// 	}
+	return data, enums.Success, err
+}
 
-// 	return data, enums.Success, err
-// }
+func SetRequest(req *http.Request, sc *SimpleCookie) {
+	if sc != nil && sc.C != "" {
+		cookies := strings.Split(sc.C, ";")
+		for _, cookie := range cookies {
+			cookie = strings.TrimSpace(cookie)
+			parts := strings.SplitN(cookie, "=", 2)
+			if len(parts) == 2 {
+				//	fmt.Println(parts[0], parts[1])
+				req.AddCookie(&http.Cookie{
+					Name:  strings.TrimSpace(parts[0]),
+					Value: strings.TrimSpace(parts[1]),
+				})
+			}
+		}
+	}
+}
 
 func saveToFileWithDir(data []byte, dir, filepath string) error {
 	// Create directory if it doesn't exist

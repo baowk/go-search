@@ -41,6 +41,14 @@ func GetProfileAndUa(browser, ver string) (profiles.ClientProfile, string) {
 	}
 	name := fmt.Sprintf("%s_%s", browser, ver)
 	prof := profiles.MappedTLSClients[name]
+	curUa := GetUa(browser, ver)
+	return prof, curUa
+}
+
+func GetUa(browser, ver string) string {
+	if ver == "" {
+		ver = Browsers[browser][rand.IntN(len(Browsers[browser]))]
+	}
 	var curUa string
 	switch browser {
 	case "chrome":
@@ -50,7 +58,7 @@ func GetProfileAndUa(browser, ver string) (profiles.ClientProfile, string) {
 	case "edge":
 		curUa = fmt.Sprintf(Edge_UA, ver)
 	default:
-		curUa = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36"
+		curUa = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 	}
-	return prof, curUa
+	return curUa
 }
