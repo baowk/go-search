@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	proxy_ok_key   = "google:proxies:ok"
-	proxy_fail_key = "google:proxies:fail"
+	Proxy_ok_key   = "google:proxies:ok"
+	Proxy_fail_key = "google:proxies:fail"
 )
 
 func GetProxy() (string, error) {
@@ -17,7 +17,7 @@ func GetProxy() (string, error) {
 		return "", err
 	}
 
-	return rCli.LPop(context.Background(), proxy_ok_key).Result()
+	return rCli.LPop(context.Background(), Proxy_ok_key).Result()
 
 }
 
@@ -29,7 +29,7 @@ func BackProxy(proxyUrl string) error {
 	if err != nil {
 		return err
 	}
-	return rCli.RPush(context.Background(), proxy_ok_key, proxyUrl).Err()
+	return rCli.RPush(context.Background(), Proxy_ok_key, proxyUrl).Err()
 }
 
 func SetFailProxy(proxyUrl string) error {
@@ -40,5 +40,5 @@ func SetFailProxy(proxyUrl string) error {
 	if err != nil {
 		return err
 	}
-	return rCli.RPush(context.Background(), proxy_fail_key, proxyUrl).Err()
+	return rCli.RPush(context.Background(), Proxy_fail_key, proxyUrl).Err()
 }

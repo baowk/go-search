@@ -5,6 +5,7 @@ import (
 	"dilu/common/config"
 	"dilu/common/middleware"
 	"dilu/common/utils"
+	"dilu/modules/job"
 	"fmt"
 	"log/slog"
 	"time"
@@ -165,6 +166,7 @@ func startedInit() {
 	}
 	utils.Setup(core.Cfg.Server.Node)
 	rdInit()
+	job.Init()
 	slog.Debug("服务启动，初始化执行完成")
 }
 

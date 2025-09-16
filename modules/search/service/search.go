@@ -19,5 +19,5 @@ func (e *SearchService) SearchHandler(req *dto.SearchReq, res *dto.SearchResp) i
 		return code
 	}
 	// 请求数据库
-	return 200
+	return code
 }

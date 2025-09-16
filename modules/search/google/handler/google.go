@@ -92,7 +92,7 @@ func ToSearch(params *dto.SearchReq, res *dto.SearchResp) (int, error) {
 	res.SearchMetadata.TotalTimeTaken = diff.Seconds()
 	res.SearchMetadata.ProcessedAt = end.Format("2006-01-02 15:04:05")
 	res.SearchParameters = *params
-	return sCode, nil
+	return sCode, err
 }
 
 func SearchV2(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]byte, int, error) {

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	cookies_key = "serp:google:cookies"
+	cookies_ok_key = "serp:google:cookies:v2"
 
 	cookies_fail_key = "serp:google:cookies:fail"
 )
@@ -19,7 +19,7 @@ func GetReqHeader() (*SimpleCookie, error) {
 		return nil, err
 	}
 
-	strC, err := rCli.LPop(context.Background(), cookies_key).Result()
+	strC, err := rCli.LPop(context.Background(), cookies_ok_key).Result()
 
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func BackReqHeader(header *SimpleCookie) error {
 
 	header.N = header.N + 1
 	data, _ := json.Marshal(header)
-	return rCli.RPush(context.Background(), cookies_key, string(data)).Err()
+	return rCli.RPush(context.Background(), cookies_ok_key, string(data)).Err()
 }
 
 func SetFailReqHeader(header *SimpleCookie) error {
