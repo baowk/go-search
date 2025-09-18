@@ -41,11 +41,22 @@ func GetProfileAndUa(browser, ver string) (profiles.ClientProfile, string) {
 	}
 	name := fmt.Sprintf("%s_%s", browser, ver)
 	prof := profiles.MappedTLSClients[name]
-	curUa := GetUa(browser, ver)
+	curUa := GetUa("", browser, ver)
 	return prof, curUa
 }
 
-func GetUa(browser, ver string) string {
+func GetUa(device, browser, ver string) string {
+	switch device {
+	case "android":
+		return "Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.1639.1179 Mobile Safari/537.36"
+	case "iphone":
+		return "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/140.0.7339.122 Mobile/15E148 Safari/604.1"
+	case "ipad":
+		return "Mozilla/5.0 (iPad; CPU OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/84.0.4147.71 Mobile/15E148 Safari/604.1"
+	case "safari":
+		return "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1"
+	}
+
 	if ver == "" {
 		ver = Browsers[browser][rand.IntN(len(Browsers[browser]))]
 	}

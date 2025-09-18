@@ -112,7 +112,7 @@ func SearchV2(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]b
 	return data, code, err
 }
 
-func Search(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]byte, int, error) {
+func Search(params *dto.SearchReq, proxyUrl string, header *SimpleCookie, device string) ([]byte, int, error) {
 	pUrl, err := url.Parse(proxyUrl)
 	if err != nil {
 		return nil, enums.ErrProxy, err
@@ -124,7 +124,7 @@ func Search(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]byt
 	}
 
 	SetRequest(req, header)
-	req.Header.Set("User-Agent", browser.GetUa("chrome", ""))
+	req.Header.Set("User-Agent", browser.GetUa(device, "chrome", ""))
 
 	client := &http.Client{
 		Transport: &http.Transport{
@@ -172,15 +172,14 @@ func Search(params *dto.SearchReq, proxyUrl string, header *SimpleCookie) ([]byt
 	}
 
 	if len(data) < 100_000 {
+		saveToFileWithDir(data, "htmls/err", fmt.Sprintf("err_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
 		if bytes.Contains(data, []byte(enums.ErrRiskControlClick)) {
 			//saveToFileWithDir(data, "errhtml", fmt.Sprintf("ge_click_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
 			return nil, enums.ErrRiskControlClickCode, fmt.Errorf("click risk control")
 		}
-
-		saveToFileWithDir(data, "errhtml", fmt.Sprintf("ge_click_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
 		return data, enums.ErrRiskControl, fmt.Errorf("keyword not found in response: %s", params.Q)
 	} else {
-		//saveToFileWithDir(data, "errhtml", fmt.Sprintf("ok_%s_%d.html", time.Now().Format("20060102"), time.Now().UnixNano()))
+		saveToFileWithDir(data, "htmls/ok", fmt.Sprintf("%s_%s_%d.html", device, time.Now().Format("20060102"), time.Now().UnixNano()))
 	}
 
 	return data, enums.Success, err
